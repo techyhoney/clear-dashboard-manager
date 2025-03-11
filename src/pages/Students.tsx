@@ -9,13 +9,13 @@ import { EntityForm } from '@/components/ui/EntityForm';
 import { students } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Student } from '@/lib/types';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
 const Students = () => {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
-  const [studentsList, setStudentsList] = useState([...students]);
+  const [studentsList, setStudentsList] = useState<Student[]>([...students]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -104,13 +104,17 @@ const Students = () => {
     }
     
     if (currentStudent) {
-      // Update existing student
+      // Update existing student - convert dateOfBirth from string to Date
       const updatedStudents = studentsList.map(s => 
         s.id === currentStudent.id 
           ? { 
               ...s, 
-              ...formData, 
-              updatedAt: new Date() 
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone,
+              studentId: formData.studentId,
+              dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : undefined,
+              updatedAt: new Date()
             } 
           : s
       );
@@ -120,10 +124,14 @@ const Students = () => {
         description: `${formData.name} has been updated`,
       });
     } else {
-      // Create new student
+      // Create new student - convert dateOfBirth from string to Date
       const newStudent: Student = {
         id: Math.random().toString(36).substring(2, 11),
-        ...formData,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        studentId: formData.studentId,
+        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : undefined,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -169,9 +177,12 @@ const Students = () => {
         }
       }}>
         <DialogContent className="sm:max-w-[550px] p-0">
-          <DialogTitle className="sr-only">
+          <DialogTitle className="px-4 pt-4">
             {currentStudent ? 'Edit Student' : 'Add Student'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {currentStudent ? 'Edit student information' : 'Enter new student information'}
+          </DialogDescription>
           <EntityForm
             title="Student"
             onSubmit={handleFormSubmit}
