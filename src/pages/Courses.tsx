@@ -11,7 +11,7 @@ import { EntityForm } from '@/components/ui/EntityForm';
 import { courses, departments } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Course } from '@/lib/types';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Courses = () => {
   const { toast } = useToast();
@@ -144,7 +144,24 @@ const Courses = () => {
       });
     }
     
+    closeForm();
+  };
+
+  const closeForm = () => {
+    // First close the form logically
     setIsFormOpen(false);
+    
+    // Then reset the form data after a short delay
+    setTimeout(() => {
+      setCurrentCourse(null);
+      setFormData({
+        code: '',
+        name: '',
+        credits: '3',
+        departmentId: '',
+        description: '',
+      });
+    }, 200);
   };
 
   return (
@@ -172,20 +189,22 @@ const Courses = () => {
       />
 
       <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) {
-          setTimeout(() => {
-            setIsFormOpen(false);
-          }, 100);
-        }
+        if (!open) closeForm();
       }}>
-        <DialogContent className="sm:max-w-[550px] p-0">
-          <DialogTitle className="sr-only">
-            {currentCourse ? 'Edit Course' : 'Add Course'}
-          </DialogTitle>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>
+              {currentCourse ? 'Edit Course' : 'Add Course'}
+            </DialogTitle>
+            <DialogDescription>
+              {currentCourse ? 'Update course information' : 'Enter new course information'}
+            </DialogDescription>
+          </DialogHeader>
+          
           <EntityForm
             title="Course"
             onSubmit={handleFormSubmit}
-            onCancel={() => setIsFormOpen(false)}
+            onCancel={closeForm}
             isEdit={!!currentCourse}
           >
             <div className="space-y-4">

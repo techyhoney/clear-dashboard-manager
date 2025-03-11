@@ -10,7 +10,7 @@ import { EntityForm } from '@/components/ui/EntityForm';
 import { instructors, departments } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Instructor } from '@/lib/types';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Instructors = () => {
   const { toast } = useToast();
@@ -139,7 +139,24 @@ const Instructors = () => {
       });
     }
     
+    closeForm();
+  };
+
+  const closeForm = () => {
+    // First close the form logically
     setIsFormOpen(false);
+    
+    // Then reset the form data after a short delay
+    setTimeout(() => {
+      setCurrentInstructor(null);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        departmentId: '',
+        title: '',
+      });
+    }, 200);
   };
 
   return (
@@ -167,21 +184,22 @@ const Instructors = () => {
       />
 
       <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) {
-          // Allow a small delay before closing to prevent click event issues
-          setTimeout(() => {
-            setIsFormOpen(false);
-          }, 100);
-        }
+        if (!open) closeForm();
       }}>
-        <DialogContent className="sm:max-w-[550px] p-0">
-          <DialogTitle className="sr-only">
-            {currentInstructor ? 'Edit Instructor' : 'Add Instructor'}
-          </DialogTitle>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>
+              {currentInstructor ? 'Edit Instructor' : 'Add Instructor'}
+            </DialogTitle>
+            <DialogDescription>
+              {currentInstructor ? 'Update instructor information' : 'Enter new instructor information'}
+            </DialogDescription>
+          </DialogHeader>
+          
           <EntityForm
             title="Instructor"
             onSubmit={handleFormSubmit}
-            onCancel={() => setIsFormOpen(false)}
+            onCancel={closeForm}
             isEdit={!!currentInstructor}
           >
             <div className="space-y-4">

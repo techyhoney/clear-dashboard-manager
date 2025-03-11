@@ -26,10 +26,17 @@ export const EntityForm = ({
           {children}
         </CardContent>
         <CardFooter className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+          >
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+          >
             {isLoading ? 'Saving...' : isEdit ? 'Update' : 'Create'}
           </Button>
         </CardFooter>
