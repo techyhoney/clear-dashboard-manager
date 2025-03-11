@@ -10,7 +10,7 @@ import { EntityForm } from '@/components/ui/EntityForm';
 import { instructors, departments } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Instructor } from '@/lib/types';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 const Instructors = () => {
   const { toast } = useToast();
@@ -166,8 +166,18 @@ const Instructors = () => {
         title="Instructors"
       />
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        if (!open) {
+          // Allow a small delay before closing to prevent click event issues
+          setTimeout(() => {
+            setIsFormOpen(false);
+          }, 100);
+        }
+      }}>
         <DialogContent className="sm:max-w-[550px] p-0">
+          <DialogTitle className="sr-only">
+            {currentInstructor ? 'Edit Instructor' : 'Add Instructor'}
+          </DialogTitle>
           <EntityForm
             title="Instructor"
             onSubmit={handleFormSubmit}
