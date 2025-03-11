@@ -8,7 +8,7 @@ import { DataTable } from '@/components/ui/DataTable';
 import { EntityForm } from '@/components/ui/EntityForm';
 import { students } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { Student } from '@/lib/types';
+import { Student, StudentFormData } from '@/lib/interfaces';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Students = () => {
@@ -18,12 +18,13 @@ const Students = () => {
   const [studentsList, setStudentsList] = useState<Student[]>([...students]);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<StudentFormData>({
     name: '',
     email: '',
     phone: '',
     studentId: '',
     dateOfBirth: '',
+    address: '',
   });
 
   const columns = [
@@ -66,6 +67,7 @@ const Students = () => {
       phone: '',
       studentId: '',
       dateOfBirth: '',
+      address: '',
     });
     setIsFormOpen(true);
   };
@@ -78,6 +80,7 @@ const Students = () => {
       phone: student.phone || '',
       studentId: student.studentId,
       dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : '',
+      address: student.address || '',
     });
     setIsFormOpen(true);
   };
@@ -104,7 +107,7 @@ const Students = () => {
     }
     
     if (currentStudent) {
-      // Update existing student - convert dateOfBirth from string to Date
+      // Update existing student
       const updatedStudents = studentsList.map(s => 
         s.id === currentStudent.id 
           ? { 
@@ -114,6 +117,7 @@ const Students = () => {
               phone: formData.phone,
               studentId: formData.studentId,
               dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : undefined,
+              address: formData.address,
               updatedAt: new Date()
             } 
           : s
@@ -124,7 +128,7 @@ const Students = () => {
         description: `${formData.name} has been updated`,
       });
     } else {
-      // Create new student - convert dateOfBirth from string to Date
+      // Create new student
       const newStudent: Student = {
         id: Math.random().toString(36).substring(2, 11),
         name: formData.name,
@@ -132,6 +136,7 @@ const Students = () => {
         phone: formData.phone,
         studentId: formData.studentId,
         dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : undefined,
+        address: formData.address,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -158,6 +163,7 @@ const Students = () => {
         phone: '',
         studentId: '',
         dateOfBirth: '',
+        address: '',
       });
     }, 200);
   };
@@ -186,9 +192,15 @@ const Students = () => {
         title="Students"
       />
 
-      <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) closeForm();
-      }}>
+      <Dialog 
+        open={isFormOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            // Use closeForm to ensure proper cleanup when dialog is closed
+            closeForm();
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>
@@ -248,6 +260,16 @@ const Students = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="(123) 456-7890"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="123 Main St, City, State"
                 />
               </div>
 

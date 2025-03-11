@@ -10,17 +10,17 @@ import { DataTable } from '@/components/ui/DataTable';
 import { EntityForm } from '@/components/ui/EntityForm';
 import { courses, departments } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { Course } from '@/lib/types';
+import { Course, CourseFormData } from '@/lib/interfaces';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Courses = () => {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
-  const [coursesList, setCoursesList] = useState([...courses]);
+  const [coursesList, setCoursesList] = useState<Course[]>([...courses]);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CourseFormData>({
     code: '',
     name: '',
     credits: '3',
@@ -108,10 +108,7 @@ const Courses = () => {
       return;
     }
     
-    const processedFormData = {
-      ...formData,
-      credits: parseInt(formData.credits, 10),
-    };
+    const credits = parseInt(formData.credits, 10);
     
     if (currentCourse) {
       // Update existing course
@@ -119,7 +116,11 @@ const Courses = () => {
         c.id === currentCourse.id 
           ? { 
               ...c, 
-              ...processedFormData, 
+              code: formData.code,
+              name: formData.name,
+              credits: credits,
+              departmentId: formData.departmentId,
+              description: formData.description || undefined,
               updatedAt: new Date() 
             } 
           : c
@@ -133,7 +134,11 @@ const Courses = () => {
       // Create new course
       const newCourse: Course = {
         id: Math.random().toString(36).substring(2, 11),
-        ...processedFormData,
+        code: formData.code,
+        name: formData.name,
+        credits: credits,
+        departmentId: formData.departmentId,
+        description: formData.description || undefined,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -188,9 +193,14 @@ const Courses = () => {
         title="Courses"
       />
 
-      <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) closeForm();
-      }}>
+      <Dialog 
+        open={isFormOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            closeForm();
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>

@@ -9,7 +9,7 @@ import { DataTable } from '@/components/ui/DataTable';
 import { EntityForm } from '@/components/ui/EntityForm';
 import { sections, courses, instructors } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { Section } from '@/lib/types';
+import { Section, SectionFormData } from '@/lib/interfaces';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Sections = () => {
@@ -19,13 +19,13 @@ const Sections = () => {
   const [sectionsList, setSectionsList] = useState<Section[]>([...sections]);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SectionFormData>({
     courseId: '',
     instructorId: '',
     roomNumber: '',
-    maxStudents: '',
-    semester: '',
-    year: '',
+    maxStudents: '30',
+    semester: 'Fall',
+    year: new Date().getFullYear().toString(),
     sectionNumber: '',
   });
 
@@ -63,7 +63,7 @@ const Sections = () => {
     {
       id: 'room',
       header: 'Room',
-      cell: (row: Section) => row.roomNumber,
+      cell: (row: Section) => row.roomNumber || 'N/A',
     },
     {
       id: 'capacity',
@@ -91,7 +91,7 @@ const Sections = () => {
     setFormData({
       courseId: section.courseId,
       instructorId: section.instructorId,
-      roomNumber: section.roomNumber,
+      roomNumber: section.roomNumber || '',
       maxStudents: section.maxStudents.toString(),
       semester: section.semester,
       year: section.year.toString(),
@@ -121,12 +121,9 @@ const Sections = () => {
       return;
     }
     
-    // Process form data
-    const processedFormData = {
-      ...formData,
-      maxStudents: parseInt(formData.maxStudents, 10),
-      year: parseInt(formData.year, 10),
-    };
+    // Process form data for types
+    const maxStudents = parseInt(formData.maxStudents, 10);
+    const year = parseInt(formData.year, 10);
     
     if (currentSection) {
       // Update existing section
@@ -134,7 +131,13 @@ const Sections = () => {
         s.id === currentSection.id 
           ? { 
               ...s, 
-              ...processedFormData, 
+              courseId: formData.courseId,
+              instructorId: formData.instructorId,
+              roomNumber: formData.roomNumber || undefined,
+              maxStudents: maxStudents,
+              semester: formData.semester,
+              year: year,
+              sectionNumber: formData.sectionNumber,
               updatedAt: new Date() 
             } 
           : s
@@ -148,7 +151,13 @@ const Sections = () => {
       // Create new section
       const newSection: Section = {
         id: Math.random().toString(36).substring(2, 11),
-        ...processedFormData,
+        courseId: formData.courseId,
+        instructorId: formData.instructorId,
+        roomNumber: formData.roomNumber || undefined,
+        maxStudents: maxStudents,
+        semester: formData.semester,
+        year: year,
+        sectionNumber: formData.sectionNumber,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -173,9 +182,9 @@ const Sections = () => {
         courseId: '',
         instructorId: '',
         roomNumber: '',
-        maxStudents: '',
-        semester: '',
-        year: '',
+        maxStudents: '30',
+        semester: 'Fall',
+        year: new Date().getFullYear().toString(),
         sectionNumber: '',
       });
     }, 200);
@@ -205,9 +214,14 @@ const Sections = () => {
         title="Course Sections"
       />
 
-      <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) closeForm();
-      }}>
+      <Dialog 
+        open={isFormOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            closeForm();
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>
@@ -277,13 +291,12 @@ const Sections = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="roomNumber">Room Number *</Label>
+                  <Label htmlFor="roomNumber">Room Number</Label>
                   <Input
                     id="roomNumber"
                     value={formData.roomNumber}
                     onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
                     placeholder="e.g. CS-101"
-                    required
                   />
                 </div>
               </div>

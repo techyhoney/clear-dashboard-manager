@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/DataTable';
 import { EntityForm } from '@/components/ui/EntityForm';
 import { departments, instructors } from '@/lib/data';
-import { Department } from '@/lib/types';
+import { Department, DepartmentFormData } from '@/lib/interfaces';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ const Departments = () => {
   const [currentDepartment, setCurrentDepartment] = useState<Department | null>(null);
   
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<DepartmentFormData>({
     name: '',
     code: '',
     headInstructorId: '',
@@ -78,7 +78,6 @@ const Departments = () => {
   };
 
   const handleDelete = (department: Department) => {
-    // In a real app, you would call an API
     setDepartmentsList(departmentsList.filter(d => d.id !== department.id));
     toast({
       title: 'Department deleted',
@@ -99,14 +98,16 @@ const Departments = () => {
       return;
     }
     
-    // In a real app, you would call an API
     if (currentDepartment) {
       // Update existing department
       const updatedDepartments = departmentsList.map(d => 
         d.id === currentDepartment.id 
           ? { 
               ...d, 
-              ...formData, 
+              name: formData.name,
+              code: formData.code,
+              headInstructorId: formData.headInstructorId || undefined,
+              description: formData.description || undefined,
               updatedAt: new Date() 
             } 
           : d
@@ -120,7 +121,10 @@ const Departments = () => {
       // Create new department
       const newDepartment: Department = {
         id: Math.random().toString(36).substring(2, 11),
-        ...formData,
+        name: formData.name,
+        code: formData.code,
+        headInstructorId: formData.headInstructorId || undefined,
+        description: formData.description || undefined,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -174,9 +178,14 @@ const Departments = () => {
         title="Departments"
       />
 
-      <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) closeForm();
-      }}>
+      <Dialog 
+        open={isFormOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            closeForm();
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>

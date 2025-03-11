@@ -9,17 +9,17 @@ import { DataTable } from '@/components/ui/DataTable';
 import { EntityForm } from '@/components/ui/EntityForm';
 import { instructors, departments } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { Instructor } from '@/lib/types';
+import { Instructor, InstructorFormData } from '@/lib/interfaces';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Instructors = () => {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentInstructor, setCurrentInstructor] = useState<Instructor | null>(null);
-  const [instructorsList, setInstructorsList] = useState([...instructors]);
+  const [instructorsList, setInstructorsList] = useState<Instructor[]>([...instructors]);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<InstructorFormData>({
     name: '',
     email: '',
     phone: '',
@@ -86,7 +86,6 @@ const Instructors = () => {
   };
 
   const handleDelete = (instructor: Instructor) => {
-    // In a real application, you would call an API here
     setInstructorsList(instructorsList.filter(i => i.id !== instructor.id));
     toast({
       title: 'Instructor deleted',
@@ -107,14 +106,17 @@ const Instructors = () => {
       return;
     }
     
-    // In a real application, you would call an API here
     if (currentInstructor) {
       // Update existing instructor
       const updatedInstructors = instructorsList.map(i => 
         i.id === currentInstructor.id 
           ? { 
               ...i, 
-              ...formData, 
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone,
+              departmentId: formData.departmentId,
+              title: formData.title,
               updatedAt: new Date() 
             } 
           : i
@@ -128,7 +130,11 @@ const Instructors = () => {
       // Create new instructor
       const newInstructor: Instructor = {
         id: Math.random().toString(36).substring(2, 11),
-        ...formData,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        departmentId: formData.departmentId,
+        title: formData.title,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -183,9 +189,14 @@ const Instructors = () => {
         title="Instructors"
       />
 
-      <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) closeForm();
-      }}>
+      <Dialog 
+        open={isFormOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            closeForm();
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>
