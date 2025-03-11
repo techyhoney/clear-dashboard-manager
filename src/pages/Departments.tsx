@@ -1,11 +1,13 @@
 
 import { useState } from 'react';
+import { PlusCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/DataTable';
 import { EntityForm } from '@/components/ui/EntityForm';
 import { departments, instructors } from '@/lib/data';
 import { Department } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 const Departments = () => {
   const { toast } = useToast();
-  const [departmentsList, setDepartmentsList] = useState([...departments]);
+  const [departmentsList, setDepartmentsList] = useState<Department[]>([...departments]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentDepartment, setCurrentDepartment] = useState<Department | null>(null);
   
@@ -129,16 +131,38 @@ const Departments = () => {
       });
     }
     
+    closeForm();
+  };
+
+  const closeForm = () => {
+    // First close the form logically
     setIsFormOpen(false);
+    
+    // Then reset the form data after a short delay
+    setTimeout(() => {
+      setCurrentDepartment(null);
+      setFormData({
+        name: '',
+        code: '',
+        headInstructorId: '',
+        description: '',
+      });
+    }, 200);
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Departments</h1>
-        <p className="text-muted-foreground">
-          Manage your academic departments and their leadership.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Departments</h1>
+          <p className="text-muted-foreground">
+            Manage your academic departments and their leadership.
+          </p>
+        </div>
+        <Button onClick={handleAdd}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Department
+        </Button>
       </div>
 
       <DataTable 
@@ -150,12 +174,23 @@ const Departments = () => {
         title="Departments"
       />
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[550px] p-0">
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        if (!open) closeForm();
+      }}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>
+              {currentDepartment ? 'Edit Department' : 'Add Department'}
+            </DialogTitle>
+            <DialogDescription>
+              {currentDepartment ? 'Update department information' : 'Enter new department information'}
+            </DialogDescription>
+          </DialogHeader>
+
           <EntityForm
             title="Department"
             onSubmit={handleFormSubmit}
-            onCancel={() => setIsFormOpen(false)}
+            onCancel={closeForm}
             isEdit={!!currentDepartment}
           >
             <div className="space-y-4">
